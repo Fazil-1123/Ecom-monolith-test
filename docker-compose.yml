@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: ecom-db-microservice
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ecom_db
+      POSTGRES_USER: ecom_user
+      POSTGRES_PASSWORD: ecom_pass123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+#  app:
+#    image: ecom-backend
+#    depends_on:
+#      - db
+#    environment:
+#      SPRING_PROFILES_ACTIVE: dev
+#      DB_URL: jdbc:postgresql://db:5432/ecom_db
+#      DB_USERNAME: ecom_user
+#      DB_PASSWORD: ecom_pass123
+#    ports:
+#      - "8080:8080"
+
+volumes:
+  postgres_data:

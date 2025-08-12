@@ -1,0 +1,23 @@
+# Ignore build output
+target/
+
+# Ignore IntelliJ and IDE settings
+.idea/
+*.iml
+
+# Ignore OS and tool artifacts
+.DS_Store
+Thumbs.db
+
+# Ignore Git-related files
+.git/
+.gitignore
+
+# Ignore Maven wrapper cache (optional, if large)
+.mvn/
+
+# Ignore logs (if any are generated locally)
+*.log
+
+# Optional: ignore README and local docs if not needed in image
+README.md
