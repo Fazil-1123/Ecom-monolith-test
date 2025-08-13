@@ -5,6 +5,7 @@ import com.ecom.monolith.service.UserService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,26 +22,30 @@ public class UserController {
     }
 
     @GetMapping()
-    public List<UsersDto> getUsers() {
+    public ResponseEntity<List<UsersDto>> getUsers() {
         logger.info("GET /api/users - Fetching all users");
-        return userService.getUsers();
+        List<UsersDto> users = userService.getUsers();
+        return ResponseEntity.ok(users);
     }
 
     @PostMapping()
-    public UsersDto addUser(@Valid @RequestBody UsersDto user) {
+    public ResponseEntity<UsersDto> addUser(@Valid @RequestBody UsersDto user) {
         logger.info("POST /api/users - Adding new user with email={}", user.getEmail());
-        return userService.addUser(user);
+        UsersDto usersDto = userService.addUser(user);
+        return ResponseEntity.ok(usersDto);
     }
 
     @GetMapping("{id}")
-    public UsersDto findById(@PathVariable("id") Long id) {
+    public ResponseEntity<UsersDto> findById(@PathVariable("id") Long id) {
         logger.info("GET /api/users/{} - Fetching user by ID", id);
-        return userService.findById(id);
+        UsersDto usersDto = userService.findById(id);
+        return ResponseEntity.ok(usersDto);
     }
 
     @PutMapping("{id}")
-    public UsersDto updateUser(@PathVariable("id") Long id, @Valid @RequestBody UsersDto users) {
+    public ResponseEntity<UsersDto> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UsersDto users) {
         logger.info("PUT /api/users/{} - Updating user", id);
-        return userService.updateUser(id, users);
+        UsersDto usersDto = userService.updateUser(id, users);
+        return ResponseEntity.ok(usersDto);
     }
 }

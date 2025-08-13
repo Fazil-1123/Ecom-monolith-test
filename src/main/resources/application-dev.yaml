@@ -6,7 +6,7 @@ info:
 
 spring:
   datasource:
-    url: ${DB_URL:jdbc:postgresql://host.docker.internal:5432/ecom_db}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/ecom_db}
     username: ${DB_USERNAME:ecom_user}
     password: ${DB_PASSWORD:ecom_pass123}
 
