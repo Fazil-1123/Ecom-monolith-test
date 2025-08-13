@@ -23,33 +23,38 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<ProductDto> getAllProducts() {
+    public ResponseEntity<List<ProductDto>> getAllProducts() {
         logger.info("GET /api/products - Fetching all products");
-        return productService.getAllProducts();
+        List<ProductDto> productDtos = productService.getAllProducts();
+        return ResponseEntity.ok(productDtos);
     }
 
     @GetMapping("{id}")
-    public ProductDto findById(@PathVariable("id") Long id) {
+    public ResponseEntity<ProductDto> findById(@PathVariable("id") Long id) {
         logger.info("GET /api/products/{} - Fetching product by ID", id);
-        return productService.findById(id);
+        ProductDto productDto = productService.findById(id);
+        return ResponseEntity.ok(productDto);
     }
 
     @GetMapping("/search")
-    public List<ProductDto> findByKeyword(@RequestParam("keyword") String keyword) {
+    public ResponseEntity<List<ProductDto>> findByKeyword(@RequestParam("keyword") String keyword) {
         logger.info("GET /api/products/search?keyword={} - Searching products", keyword);
-        return productService.findByKeyword(keyword);
+        List<ProductDto> productDtos = productService.findByKeyword(keyword);
+        return ResponseEntity.ok(productDtos);
     }
 
     @PostMapping
-    public ProductDto addProduct(@Valid @RequestBody ProductDto productDto) {
+    public ResponseEntity<ProductDto> addProduct(@Valid @RequestBody ProductDto productDto) {
         logger.info("POST /api/products - Adding new product with name={}", productDto.getName());
-        return productService.addProduct(productDto);
+        ProductDto savedProduct = productService.addProduct(productDto);
+        return ResponseEntity.ok(savedProduct);
     }
 
     @PutMapping("{id}")
-    public ProductDto updateProduct(@PathVariable("id") Long id, @Valid @RequestBody ProductDto productDto) {
+    public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") Long id, @Valid @RequestBody ProductDto productDto) {
         logger.info("PUT /api/products/{} - Updating product with name={}", id, productDto.getName());
-        return productService.updateProduct(id, productDto);
+        ProductDto savedProduct = productService.updateProduct(id, productDto);
+        return ResponseEntity.ok(savedProduct);
     }
 
     @DeleteMapping("{id}")
