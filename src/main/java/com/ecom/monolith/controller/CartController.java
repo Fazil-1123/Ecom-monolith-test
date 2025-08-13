@@ -52,8 +52,9 @@ public class CartController {
     }
 
     @GetMapping
-    public List<CartResponse> getCartItems(@RequestHeader("X-User-ID") String userId) {
+    public ResponseEntity<List<CartResponse>> getCartItems(@RequestHeader("X-User-ID") String userId) {
         logger.info("GET /api/cart - Fetching cart items for userId={}", userId);
-        return cartItemService.getCartItems(userId);
+        List<CartResponse> cartResponses=  cartItemService.getCartItems(userId);
+        return ResponseEntity.ok(cartResponses);
     }
 }
