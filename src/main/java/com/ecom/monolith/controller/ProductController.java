@@ -62,6 +62,6 @@ public class ProductController {
         logger.info("DELETE /api/products/{} - Deleting product", id);
         String response = productService.deleteProduct(id);
         logger.info("Product deleted. Response: {}", response);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 }
