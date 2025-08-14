@@ -1,29 +1,42 @@
 version: '3.8'
 
 services:
+
+  #  rabbitmq:
+  #    image: rabbitmq:4-management
+  #    container_name: rabbitmq
+  #    ports:
+  #      - "5672:5672"
+  #      - "15672:15672"
+  #    environment:
+  #      RABBITMQ_DEFAULT_USER: guest
+  #      RABBITMQ_DEFAULT_PASS: guest
+
   db:
     image: postgres:15
-    container_name: ecom-db-microservice
+    container_name: postgres_container_ecom
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: ecom_db
       POSTGRES_USER: ecom_user
       POSTGRES_PASSWORD: ecom_pass123
+      POSTGRES_DB: ecom_db
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_db:/var/lib/postgresql/data
 
-#  app:
-#    image: ecom-backend
-#    depends_on:
-#      - db
-#    environment:
-#      SPRING_PROFILES_ACTIVE: dev
-#      DB_URL: jdbc:postgresql://db:5432/ecom_db
-#      DB_USERNAME: ecom_user
-#      DB_PASSWORD: ecom_pass123
-#    ports:
-#      - "8080:8080"
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_container_ecom
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@ecom.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    depends_on:
+      - db
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
 
 volumes:
-  postgres_data:
+  postgres_data_db:
+  pgadmin_data:
