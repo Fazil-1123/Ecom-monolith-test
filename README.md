@@ -1,6 +1,5 @@
-# E-Commerce Monolith (Spring Boot)
+# E-Commerce Monolith
 
-Production-grade backend with a **teaching-quality test suite**.  
 Focus areas: **unit tests**, **integration tests** with **Testcontainers**, and **coverage gates**.
 
 ---
@@ -10,7 +9,7 @@ Focus areas: **unit tests**, **integration tests** with **Testcontainers**, and 
 - Java 21, Spring Boot 3
 - Spring MVC, Spring Data JPA, Bean Validation
 - PostgreSQL (**Testcontainers** for integration tests), H2 (fast unit/slice tests)
-- JUnit 5, MockMvc, AssertJ/Hamcrest
+- JUnit 5, MockMvc, AssertJ, Mockito
 - Maven Surefire/Failsafe, JaCoCo (coverage)
 
 ---
@@ -70,7 +69,6 @@ All of the above are true end-to-end controller → service → repository → D
 
 - **JaCoCo** collects **unit + integration** coverage (agent attached in both `test` and `pre-integration-test` phases).
 - Build fails if overall **LINE** coverage < **85%**.
-- `MonolithApplication` is excluded from the coverage **gate** (bootstrap only; still shown in the report).
 
 > Adjust thresholds/excludes under `jacoco-maven-plugin` → `check` execution in `pom.xml`.
 
