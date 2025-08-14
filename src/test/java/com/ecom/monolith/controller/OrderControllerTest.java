@@ -5,6 +5,7 @@ import com.ecom.monolith.Dto.OrderResponse;
 import com.ecom.monolith.model.OrderStatus;
 import com.ecom.monolith.service.OrderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -20,6 +21,10 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Unit tests for the OrderController class.
+ * This class verifies the behavior of the order-related endpoints.
+ */
 @WebMvcTest(OrderController.class)
 public class OrderControllerTest {
 
@@ -33,18 +38,19 @@ public class OrderControllerTest {
     private OrderService orderService;
 
     @Test
+    @DisplayName("Should return HTTP 201 when order is successfully placed")
     void placeOrder_ok() throws Exception {
-        Long userId = 1L;
+        long userId = 1L;
         BigDecimal totalAmount = BigDecimal.valueOf(100.00);
         OrderItemResponse orderItemResponse1 = createOrderItemResponse(1L, 1L, 2, BigDecimal.valueOf(50.00));
         OrderItemResponse orderItemResponse2 = createOrderItemResponse(2L, 2L, 1, BigDecimal.valueOf(50.00));
 
         OrderResponse orderResponse = createOrderResponse(1L, totalAmount, List.of(orderItemResponse1, orderItemResponse2));
 
-        when(orderService.placeOrder(userId.toString())).thenReturn(orderResponse);
+        when(orderService.placeOrder(Long.toString(userId))).thenReturn(orderResponse);
 
         mockMvc.perform(post("/api/orders")
-                        .header("X-User-ID", userId.toString())
+                        .header("X-User-ID", Long.toString(userId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(orderResponse)))
                 .andExpect(status().isCreated())
@@ -54,7 +60,7 @@ public class OrderControllerTest {
                 .andExpect(jsonPath("$.status").value(OrderStatus.ORDERED.toString()))
                 .andExpect(jsonPath("$.items.length()").value(orderResponse.getItems().size()));
 
-        verify(orderService).placeOrder(userId.toString());
+        verify(orderService).placeOrder(Long.toString(userId));
     }
 
     private OrderResponse createOrderResponse(Long id, BigDecimal totalAmount, List<OrderItemResponse> items) {

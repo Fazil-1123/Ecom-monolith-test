@@ -2,13 +2,12 @@ package com.ecom.monolith.controller;
 
 import com.ecom.monolith.Dto.AddressDto;
 import com.ecom.monolith.Dto.UsersDto;
-import com.ecom.monolith.exception.GlobalExceptionHandler;
 import com.ecom.monolith.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -19,6 +18,10 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Unit tests for the UserController class.
+ * This class verifies the behavior of the user-related endpoints.
+ */
 @WebMvcTest(UserController.class)
 public class UserControllerTest {
 
@@ -31,8 +34,8 @@ public class UserControllerTest {
     @MockitoBean
     UserService userService;
 
-
     @Test
+    @DisplayName("Should return HTTP 200 and a list of all users")
     void getUsers_ok() throws Exception {
         UsersDto userDto1 = createUserDto(
                 1L, "Jane", "Smith", "john.doe@example.com", "1234567890",
@@ -56,6 +59,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @DisplayName("Should return HTTP 200 when a user is successfully added")
     void addUser_ok() throws Exception {
         UsersDto userDto1 = createUserDto(
                 1L, "Jane", "Smith", "john.doe@example.com", "1234567890",
@@ -76,6 +80,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @DisplayName("Should return HTTP 200 and the user details for a valid ID")
     void findById_ok() throws Exception {
         UsersDto userDto1 = createUserDto(
                 1L, "Jane", "Smith", "john.doe@example.com", "1234567890",
@@ -95,6 +100,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @DisplayName("Should return HTTP 200 when a user is successfully updated")
     void updateUser_ok() throws Exception {
         UsersDto userDto1 = createUserDto(
                 1L, "Jane", "Smith", "john.doe@example.com", "1234567890",
@@ -127,11 +133,9 @@ public class UserControllerTest {
         usersDto.setPhone(phone);
         usersDto.setAddress(address);
         return usersDto;
-
     }
 
     private AddressDto createAddressDto(String street, String city, String state, String country, String zipcode) {
-
         AddressDto addressDto = new AddressDto();
         addressDto.setStreet(street);
         addressDto.setCity(city);
@@ -139,8 +143,5 @@ public class UserControllerTest {
         addressDto.setCountry(country);
         addressDto.setZipcode(zipcode);
         return addressDto;
-
     }
-
-
 }

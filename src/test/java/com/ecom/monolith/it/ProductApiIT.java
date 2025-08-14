@@ -3,6 +3,7 @@ package com.ecom.monolith.it;
 import com.ecom.monolith.BaseIntegrationTest;
 import com.ecom.monolith.Dto.ProductDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,6 +16,12 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Integration tests for the Product API.
+ * Scenarios covered:
+ * - Create a product, list all products, search by keyword, and fetch by ID.
+ * - Validation errors return HTTP 400.
+ */
 @AutoConfigureMockMvc
 public class ProductApiIT extends BaseIntegrationTest {
 
@@ -25,6 +32,7 @@ public class ProductApiIT extends BaseIntegrationTest {
     ObjectMapper objectMapper;
 
     @Test
+    @DisplayName("Create, list, search, and fetch product successfully")
     void create_list_search_fetch_product_happy_path() throws Exception {
         ProductDto payload = new ProductDto();
         payload.setName("iphone 15");
@@ -64,6 +72,7 @@ public class ProductApiIT extends BaseIntegrationTest {
     }
 
     @Test
+    @DisplayName("Return 400 for validation errors")
     void validation_errors_return_400() throws Exception {
         ProductDto productDto = new ProductDto();
         productDto.setDescription("invalid");

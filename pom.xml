@@ -208,13 +208,8 @@
 							<goal>prepare-agent</goal>
 						</goals>
 						<configuration>
-							<!-- Put the javaagent into this property so Failsafe can pick it up -->
 							<propertyName>failsafe.argLine</propertyName>
-							<!-- Append to the same exec so unit + IT coverage merge -->
 							<append>true</append>
-							<!-- (optional) explicit location:
-                            <destFile>${project.build.directory}/jacoco.exec</destFile>
-                            -->
 						</configuration>
 					</execution>
 					<execution>

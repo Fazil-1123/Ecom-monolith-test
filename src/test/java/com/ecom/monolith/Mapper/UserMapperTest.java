@@ -4,6 +4,7 @@ import com.ecom.monolith.Dto.UsersDto;
 import com.ecom.monolith.Dto.AddressDto;
 import com.ecom.monolith.model.Users;
 import com.ecom.monolith.model.Address;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
@@ -14,6 +15,7 @@ public class UserMapperTest {
     private final UserMapper mapper = Mappers.getMapper(UserMapper.class);
 
     @Test
+    @DisplayName("Verify toDto maps all basic fields and address fields correctly")
     void toDto_mapsAllBasicFields_andAddressFields() {
         Users user = user(
                 1L, "John", "Doe", "john.doe@example.com", "1234567890",
@@ -37,6 +39,7 @@ public class UserMapperTest {
     }
 
     @Test
+    @DisplayName("Verify toEntity maps all basic fields and address fields correctly")
     void toEntity_mapsAllBasicFields_andAddressFields() {
         UsersDto dto = userDto(
                 2L, "Jane", "Smith", "jane.smith@example.com", "0987654321",
@@ -60,11 +63,11 @@ public class UserMapperTest {
     }
 
     @Test
+    @DisplayName("Verify null inputs return null")
     void nullInputs_returnNull() {
         assertThat(mapper.toDto(null)).isNull();
         assertThat(mapper.toEntity(null)).isNull();
     }
-
 
     private Users user(Long id, String first, String last, String email, String phone, Address addr) {
         Users u = new Users();

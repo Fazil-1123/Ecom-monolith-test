@@ -1,6 +1,7 @@
 package com.ecom.monolith.repositories;
 
 import com.ecom.monolith.model.Product;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -12,6 +13,10 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Unit tests for the ProductRepository class.
+ * This class verifies the repository methods for Product entity.
+ */
 @DataJpaTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -21,11 +26,11 @@ public class ProductRepositoryTest {
     ProductRepository productRepository;
 
     @Test
+    @DisplayName("Verify findByActiveTrue returns only active products")
     void findByActiveTrue_active() {
-
-        Product product1 = product( "iphone 15", "iphone 15", BigDecimal.valueOf(1300), true, 10);
-        Product product2 = product( "iphone 16", "iphone 16", BigDecimal.valueOf(1500), true, 10);
-        Product product3 = product( "iphone 17", "iphone 17", BigDecimal.valueOf(2000), false, 10);
+        Product product1 = product("iphone 15", "iphone 15", BigDecimal.valueOf(1300), true, 10);
+        Product product2 = product("iphone 16", "iphone 16", BigDecimal.valueOf(1500), true, 10);
+        Product product3 = product("iphone 17", "iphone 17", BigDecimal.valueOf(2000), false, 10);
 
         productRepository.saveAll(List.of(product1, product2, product3));
         productRepository.flush();
@@ -37,10 +42,11 @@ public class ProductRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify findByNameContainingIgnoreCaseAndActiveTrue returns matching active products")
     void findByNameContainingIgnoreCaseAndActiveTrue_active() {
-        Product product1 = product( "iphone 15", "iphone 15", BigDecimal.valueOf(1300), true, 10);
-        Product product2 = product( "iphone 16", "iphone 16", BigDecimal.valueOf(1500), true, 10);
-        Product product3 = product( "samsung s25", "samsung s25", BigDecimal.valueOf(2000), true, 10);
+        Product product1 = product("iphone 15", "iphone 15", BigDecimal.valueOf(1300), true, 10);
+        Product product2 = product("iphone 16", "iphone 16", BigDecimal.valueOf(1500), true, 10);
+        Product product3 = product("samsung s25", "samsung s25", BigDecimal.valueOf(2000), true, 10);
 
         productRepository.saveAll(List.of(product1, product2, product3));
         productRepository.flush();
@@ -49,7 +55,6 @@ public class ProductRepositoryTest {
         assertThat(returnedProducts).extracting(Product::getName)
                 .containsExactlyInAnyOrder("iphone 15", "iphone 16");
         assertThat(returnedProducts).allMatch(product -> Boolean.TRUE.equals(product.getActive()));
-
     }
 
     private Product product(String name, String description, BigDecimal price, boolean active, Integer stock) {

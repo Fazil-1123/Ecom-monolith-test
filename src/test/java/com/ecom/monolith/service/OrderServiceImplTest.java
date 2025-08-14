@@ -8,6 +8,7 @@ import com.ecom.monolith.model.*;
 import com.ecom.monolith.repositories.CartItemRepository;
 import com.ecom.monolith.repositories.OrderRepository;
 import com.ecom.monolith.repositories.UsersRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -23,6 +24,10 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the OrderServiceImpl class.
+ * This class verifies the service methods for managing orders.
+ */
 @ExtendWith(MockitoExtension.class)
 public class OrderServiceImplTest {
 
@@ -44,20 +49,22 @@ public class OrderServiceImplTest {
     private static final Long id = 1L;
 
     @Test
-    void placeOrder_UserNotFound(){
+    @DisplayName("Verify placeOrder throws exception when user is not found")
+    void placeOrder_UserNotFound() {
         when(usersRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(()-> orderService.placeOrder(id.toString()))
+        assertThatThrownBy(() -> orderService.placeOrder(id.toString()))
                 .isInstanceOf(ResourceNotFound.class)
                 .hasMessageContaining("User does not exist with id: " + id);
 
         verify(usersRepository).findById(id);
         verifyNoMoreInteractions(usersRepository);
-        verifyNoInteractions(cartItemRepository,orderRepository,orderMapper);
+        verifyNoInteractions(cartItemRepository, orderRepository, orderMapper);
     }
 
     @Test
-    void placeOrder_UserExist_CartEmpty(){
+    @DisplayName("Verify placeOrder throws exception when cart is empty")
+    void placeOrder_UserExist_CartEmpty() {
         Users user1 = createUser(
                 id, "Jane", "Smith", "jane@example.com", "1234567890", UserRole.CUSTOMER,
                 createAddress(10L, "221B Baker St", "London", "Greater London", "UK", "NW1")
@@ -66,39 +73,39 @@ public class OrderServiceImplTest {
         when(usersRepository.findById(id)).thenReturn(Optional.of(user1));
         when(cartItemRepository.findByUsersId(id)).thenReturn(List.of());
 
-        assertThatThrownBy(()-> orderService.placeOrder(id.toString()))
+        assertThatThrownBy(() -> orderService.placeOrder(id.toString()))
                 .isInstanceOf(ResourceNotFound.class)
                 .hasMessageContaining("User doesn't have any items in cart");
 
         verify(usersRepository).findById(id);
         verify(cartItemRepository).findByUsersId(id);
-        verifyNoMoreInteractions(usersRepository,cartItemRepository);
-        verifyNoInteractions(orderRepository,orderMapper);
-
+        verifyNoMoreInteractions(usersRepository, cartItemRepository);
+        verifyNoInteractions(orderRepository, orderMapper);
     }
 
     @Test
-    void placeOrder_UserExist_CartExist(){
+    @DisplayName("Verify placeOrder creates order successfully when cart exists")
+    void placeOrder_UserExist_CartExist() {
         Users user1 = createUser(
                 id, "Jane", "Smith", "jane@example.com", "1234567890", UserRole.CUSTOMER,
                 createAddress(10L, "221B Baker St", "London", "Greater London", "UK", "NW1")
         );
-        Product product1 = product(1L, "iphone 15","iphone 15",BigDecimal.valueOf(1300),true,10);
-        Product product2 = product(2L, "iphone 16","iphone 16",BigDecimal.valueOf(1500),true,10);
-        CartItem cartItem1 = createCartItem(id,user1,product1,5, BigDecimal.valueOf(6500));
-        CartItem cartItem2 = createCartItem(2L,user1,product2,5, BigDecimal.valueOf(7500));
+        Product product1 = product(1L, "iphone 15", "iphone 15", BigDecimal.valueOf(1300), true, 10);
+        Product product2 = product(2L, "iphone 16", "iphone 16", BigDecimal.valueOf(1500), true, 10);
+        CartItem cartItem1 = createCartItem(id, user1, product1, 5, BigDecimal.valueOf(6500));
+        CartItem cartItem2 = createCartItem(2L, user1, product2, 5, BigDecimal.valueOf(7500));
+
         when(usersRepository.findById(id)).thenReturn(Optional.of(user1));
-        when(cartItemRepository.findByUsersId(id)).thenReturn(List.of(cartItem1,cartItem2));
-        when(orderRepository.save(any(Order.class))).thenAnswer(invocation ->
-                invocation.getArgument(0,Order.class));
+        when(cartItemRepository.findByUsersId(id)).thenReturn(List.of(cartItem1, cartItem2));
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0, Order.class));
         when(orderMapper.toDto(any(Order.class))).thenAnswer(invocation -> {
-            Order o = invocation.getArgument(0,Order.class);
+            Order o = invocation.getArgument(0, Order.class);
             OrderResponse response = new OrderResponse();
             response.setId(o.getId());
             response.setStatus(o.getStatus());
             response.setTotalAmount(o.getTotalAmount());
             List<OrderItemResponse> orderItemResponseList = new ArrayList<>();
-            for(OrderItem orderItem : o.getItems()){
+            for (OrderItem orderItem : o.getItems()) {
                 OrderItemResponse orderItemResponse = new OrderItemResponse();
                 orderItemResponse.setId(orderItem.getId());
                 orderItemResponse.setQuantity(orderItem.getQuantity());
@@ -106,7 +113,6 @@ public class OrderServiceImplTest {
                 orderItemResponse.setProductId(orderItem.getProduct().getId());
                 orderItemResponseList.add(orderItemResponse);
             }
-
             response.setItems(orderItemResponseList);
             return response;
         });
@@ -127,32 +133,32 @@ public class OrderServiceImplTest {
         verify(cartItemRepository).findByUsersId(id);
         verify(cartItemRepository).deleteAll(anyList());
         verify(orderMapper).toDto(any(Order.class));
-        verifyNoMoreInteractions(usersRepository,cartItemRepository,orderRepository,orderMapper);
+        verifyNoMoreInteractions(usersRepository, cartItemRepository, orderRepository, orderMapper);
     }
 
     @Test
-    void placeOrder_UserExist_CartExistAndPriceNull(){
+    @DisplayName("Verify placeOrder handles null prices in cart items")
+    void placeOrder_UserExist_CartExistAndPriceNull() {
         Users user1 = createUser(
                 id, "Jane", "Smith", "jane@example.com", "1234567890", UserRole.CUSTOMER,
                 createAddress(10L, "221B Baker St", "London", "Greater London", "UK", "NW1")
         );
-        Product product1 = product(1L, "iphone 15","iphone 15",null,true,10);
-        Product product2 = product(2L, "iphone 16","iphone 16",null,true,10);
-        CartItem cartItem1 = createCartItem(id,user1,product1,5, null);
-        CartItem cartItem2 = createCartItem(2L,user1,product2,5, null);
+        Product product1 = product(1L, "iphone 15", "iphone 15", null, true, 10);
+        Product product2 = product(2L, "iphone 16", "iphone 16", null, true, 10);
+        CartItem cartItem1 = createCartItem(id, user1, product1, 5, null);
+        CartItem cartItem2 = createCartItem(2L, user1, product2, 5, null);
 
         when(usersRepository.findById(id)).thenReturn(Optional.of(user1));
-        when(cartItemRepository.findByUsersId(id)).thenReturn(List.of(cartItem1,cartItem2));
-        when(orderRepository.save(any(Order.class))).thenAnswer(invocation ->
-                invocation.getArgument(0,Order.class));
+        when(cartItemRepository.findByUsersId(id)).thenReturn(List.of(cartItem1, cartItem2));
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0, Order.class));
         when(orderMapper.toDto(any(Order.class))).thenAnswer(invocation -> {
-            Order o = invocation.getArgument(0,Order.class);
+            Order o = invocation.getArgument(0, Order.class);
             OrderResponse response = new OrderResponse();
             response.setId(o.getId());
             response.setStatus(o.getStatus());
             response.setTotalAmount(o.getTotalAmount());
             List<OrderItemResponse> orderItemResponseList = new ArrayList<>();
-            for(OrderItem orderItem : o.getItems()){
+            for (OrderItem orderItem : o.getItems()) {
                 OrderItemResponse orderItemResponse = new OrderItemResponse();
                 orderItemResponse.setId(orderItem.getId());
                 orderItemResponse.setQuantity(orderItem.getQuantity());
@@ -160,7 +166,6 @@ public class OrderServiceImplTest {
                 orderItemResponse.setProductId(orderItem.getProduct().getId());
                 orderItemResponseList.add(orderItemResponse);
             }
-
             response.setItems(orderItemResponseList);
             return response;
         });
@@ -181,10 +186,11 @@ public class OrderServiceImplTest {
         verify(cartItemRepository).findByUsersId(id);
         verify(cartItemRepository).deleteAll(anyList());
         verify(orderMapper).toDto(any(Order.class));
-        verifyNoMoreInteractions(usersRepository,cartItemRepository,orderRepository,orderMapper);
+        verifyNoMoreInteractions(usersRepository, cartItemRepository, orderRepository, orderMapper);
     }
+
     private Users createUser(Long id, String firstName, String lastName, String email,
-                             String phone, UserRole role, Address address){
+                             String phone, UserRole role, Address address) {
         Users user = new Users();
         user.setId(id);
         user.setFirstName(firstName);
@@ -196,8 +202,7 @@ public class OrderServiceImplTest {
         return user;
     }
 
-    private Address createAddress(Long id, String street, String city, String state, String country, String zipcode){
-
+    private Address createAddress(Long id, String street, String city, String state, String country, String zipcode) {
         Address address = new Address();
         address.setId(id);
         address.setStreet(street);
@@ -206,11 +211,10 @@ public class OrderServiceImplTest {
         address.setCountry(country);
         address.setZipcode(zipcode);
         return address;
-
     }
 
     private CartItem createCartItem(Long id, Users users, Product product, Integer quantity,
-                                    BigDecimal price){
+                                    BigDecimal price) {
         CartItem cartItem = new CartItem();
         cartItem.setId(id);
         cartItem.setUsers(users);
@@ -220,7 +224,7 @@ public class OrderServiceImplTest {
         return cartItem;
     }
 
-    private Product product(Long id, String name, String description, BigDecimal price, boolean active, Integer stock){
+    private Product product(Long id, String name, String description, BigDecimal price, boolean active, Integer stock) {
         Product product = new Product();
         product.setName(name);
         product.setId(id);

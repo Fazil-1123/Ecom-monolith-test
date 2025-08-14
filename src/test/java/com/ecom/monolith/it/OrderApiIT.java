@@ -5,6 +5,7 @@ import com.ecom.monolith.Dto.CartRequest;
 import com.ecom.monolith.Dto.ProductDto;
 import com.ecom.monolith.Dto.UsersDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -19,6 +20,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Integration tests for the Order API.
+ * Scenarios covered:
+ * - Place an order from the cart and clear the cart.
+ * - Missing user header returns 400.
+ * - Placing an order with an empty cart returns 404.
+ */
 @AutoConfigureMockMvc
 public class OrderApiIT extends BaseIntegrationTest {
 
@@ -27,6 +35,49 @@ public class OrderApiIT extends BaseIntegrationTest {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Test
+    @DisplayName("Place order from cart and clear cart successfully")
+    void place_order_from_cart_returns_201_and_clears_cart() throws Exception {
+        UsersDto user = createUser("Jane", "Smith", "john.doe@example.com", "1234567890");
+        ProductDto product1 = createProduct("iphone 15", BigDecimal.valueOf(1500));
+        ProductDto product2 = createProduct("iphone 16", BigDecimal.valueOf(1700));
+
+        addToCart(user.getId(), product1.getId(), 2);
+        addToCart(user.getId(), product2.getId(), 1);
+
+        String orderJson = mockMvc.perform(post("/api/orders")
+                        .header("X-User-ID", String.valueOf(user.getId())))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.items", not(empty())))
+                .andExpect(jsonPath("$.items[*].productId", hasItems(product1.getId().intValue(), product2.getId().intValue())))
+                .andExpect(jsonPath("$.items[*].quantity", hasItems(2, 1)))
+                .andExpect(jsonPath("$.totalAmount", notNullValue()))
+                .andReturn().getResponse().getContentAsString();
+
+        mockMvc.perform(get("/api/cart")
+                        .header("X-User-ID", String.valueOf(user.getId())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    @DisplayName("Return 400 when user header is missing")
+    void missing_user_header_returns_400() throws Exception {
+        mockMvc.perform(post("/api/orders"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Return 404 when placing order with an empty cart")
+    void placing_order_with_empty_cart_returns_404() throws Exception {
+        UsersDto user = createUser("Jane", "Smith", "john.doe@example.com", "1234567890");
+
+        mockMvc.perform(post("/api/orders")
+                        .header("X-User-ID", String.valueOf(user.getId())))
+                .andExpect(status().isNotFound());
+    }
 
     private UsersDto createUser(String first, String last, String email, String phone) throws Exception {
         UsersDto usersDto = new UsersDto();
@@ -80,46 +131,5 @@ public class OrderApiIT extends BaseIntegrationTest {
                         .header("X-User-ID", String.valueOf(userId))
                         .content(objectMapper.writeValueAsString(cartRequest)))
                 .andExpect(status().isOk());
-    }
-
-
-    @Test
-    void place_order_from_cart_returns_201_and_clears_cart() throws Exception {
-        UsersDto user = createUser("Jane", "Smith", "john.doe@example.com", "1234567890");
-        ProductDto product1 = createProduct("iphone 15", BigDecimal.valueOf(1500));
-        ProductDto product2 = createProduct("iphone 16", BigDecimal.valueOf(1700));
-
-        addToCart(user.getId(), product1.getId(), 2);
-        addToCart(user.getId(), product2.getId(), 1);
-
-        String orderJson = mockMvc.perform(post("/api/orders")
-                        .header("X-User-ID", String.valueOf(user.getId())))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect(jsonPath("$.items", not(empty())))
-                .andExpect(jsonPath("$.items[*].productId", hasItems(product1.getId().intValue(), product2.getId().intValue())))
-                .andExpect(jsonPath("$.items[*].quantity", hasItems(2, 1)))
-                .andExpect(jsonPath("$.totalAmount", notNullValue()))
-                .andReturn().getResponse().getContentAsString();
-
-        mockMvc.perform(get("/api/cart")
-                        .header("X-User-ID", String.valueOf(user.getId())))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
-    }
-
-    @Test
-    void missing_user_header_returns_400() throws Exception {
-        mockMvc.perform(post("/api/orders"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void placing_order_with_empty_cart_returns_404() throws Exception {
-        UsersDto user = createUser("Jane", "Smith", "john.doe@example.com", "1234567890");
-
-        mockMvc.perform(post("/api/orders")
-                        .header("X-User-ID", String.valueOf(user.getId())))
-                .andExpect(status().isNotFound());
     }
 }

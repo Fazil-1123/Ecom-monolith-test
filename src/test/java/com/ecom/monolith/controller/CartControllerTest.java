@@ -4,6 +4,7 @@ import com.ecom.monolith.Dto.CartRequest;
 import com.ecom.monolith.Dto.CartResponse;
 import com.ecom.monolith.service.CartItemService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -18,6 +19,11 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+
+/**
+ * Unit tests for the CartController class.
+ * This class uses Spring's WebMvcTest for testing the controller layer and Mockito for mocking dependencies.
+ */
 @WebMvcTest(CartController.class)
 public class CartControllerTest {
 
@@ -31,6 +37,7 @@ public class CartControllerTest {
     private CartItemService cartItemService;
 
     @Test
+    @DisplayName("Should return HTTP 200 when item is successfully added to the cart")
     void addToCart_ok() throws Exception {
         String productId = "1L";
         int quantity = 2;
@@ -51,6 +58,7 @@ public class CartControllerTest {
     }
 
     @Test
+    @DisplayName("Should return HTTP 404 when item is out of stock")
     void addToCart_outOfStock() throws Exception {
         String productId = "1L";
         int quantity = 2;
@@ -71,6 +79,7 @@ public class CartControllerTest {
     }
 
     @Test
+    @DisplayName("Should return HTTP 200 when item is successfully removed from the cart")
     void removeItem_ok() throws Exception {
         Long productId = 1L;
 
@@ -85,6 +94,7 @@ public class CartControllerTest {
     }
 
     @Test
+    @DisplayName("Should return HTTP 404 when cart item is not found")
     void removeItem_CartNotFound() throws Exception {
         Long productId = 1L;
 
@@ -99,6 +109,7 @@ public class CartControllerTest {
     }
 
     @Test
+    @DisplayName("Should return HTTP 200 and a list of cart items in JSON format")
     void getCartItems_ok() throws Exception {
         CartResponse cartResponse1 = createCartResponse("1L", 2);
         CartResponse cartResponse2 = createCartResponse("2L", 3);

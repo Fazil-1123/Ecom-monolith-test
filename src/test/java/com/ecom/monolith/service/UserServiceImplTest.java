@@ -8,6 +8,7 @@ import com.ecom.monolith.model.Address;
 import com.ecom.monolith.model.UserRole;
 import com.ecom.monolith.model.Users;
 import com.ecom.monolith.repositories.UsersRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -21,6 +22,10 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the UserServiceImpl class.
+ * This class verifies the service methods for managing users.
+ */
 @ExtendWith(MockitoExtension.class)
 public class UserServiceImplTest {
 
@@ -34,7 +39,8 @@ public class UserServiceImplTest {
     UserServiceImpl userService;
 
     @Test
-    void getUsers_returnsMappedList(){
+    @DisplayName("Verify getUsers returns mapped list of users")
+    void getUsers_returnsMappedList() {
         UsersDto userDto1 = createUserDto(
                 1L, "Jane", "Smith", "john.doe@example.com", "1234567890",
                 createAddressDto("221B Baker St", "London", "Greater London", "UK", "NW1")
@@ -44,22 +50,22 @@ public class UserServiceImplTest {
                 createAddressDto("742 Evergreen Terrace", "Springfield", "AnyState", "USA", "49007")
         );
         Users user1 = createUser(
-                1L, "Jane", "Smith", "john.doe@example.com", "1234567890",UserRole.CUSTOMER,
-                createAddress(1L,"221B Baker St", "London", "Greater London", "UK", "NW1")
+                1L, "Jane", "Smith", "john.doe@example.com", "1234567890", UserRole.CUSTOMER,
+                createAddress(1L, "221B Baker St", "London", "Greater London", "UK", "NW1")
         );
         Users user2 = createUser(
-                2L, "John", "Doe", "jane.smith@example.com", "0987654321",UserRole.CUSTOMER,
-                createAddress(2L,"742 Evergreen Terrace", "Springfield", "AnyState", "USA", "49007")
+                2L, "John", "Doe", "jane.smith@example.com", "0987654321", UserRole.CUSTOMER,
+                createAddress(2L, "742 Evergreen Terrace", "Springfield", "AnyState", "USA", "49007")
         );
-        when(usersRepository.findAll()).thenReturn(List.of(user1,user2));
+        when(usersRepository.findAll()).thenReturn(List.of(user1, user2));
         when(userMapper.toDto(user1)).thenReturn(userDto1);
         when(userMapper.toDto(user2)).thenReturn(userDto2);
 
         List<UsersDto> result = userService.getUsers();
 
-        assertThat(result).extracting(UsersDto::getId).containsExactly(1L,2L);
-        assertThat(result.getFirst().getEmail()).isEqualTo("john.doe@example.com");
-        assertThat(result.getFirst().getAddress().getCity()).isEqualTo("London");
+        assertThat(result).extracting(UsersDto::getId).containsExactly(1L, 2L);
+        assertThat(result.get(0).getEmail()).isEqualTo("john.doe@example.com");
+        assertThat(result.get(0).getAddress().getCity()).isEqualTo("London");
 
         verify(usersRepository).findAll();
         verify(userMapper).toDto(user1);
@@ -68,6 +74,7 @@ public class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Verify getUsers returns empty list when no users are found")
     void getUsers_empty_returnsEmptyList() {
         when(usersRepository.findAll()).thenReturn(List.of());
 
@@ -80,17 +87,18 @@ public class UserServiceImplTest {
     }
 
     @Test
-    void addUser_returnedSavedUser(){
+    @DisplayName("Verify addUser saves and returns the saved user")
+    void addUser_returnedSavedUser() {
         Users user1 = createUser(
-                1L, "Jane", "Smith", "john.doe@example.com", "1234567890",UserRole.CUSTOMER,
-                createAddress(1L,"221B Baker St", "London", "Greater London", "UK", "NW1")
+                1L, "Jane", "Smith", "john.doe@example.com", "1234567890", UserRole.CUSTOMER,
+                createAddress(1L, "221B Baker St", "London", "Greater London", "UK", "NW1")
         );
         UsersDto userDto1 = createUserDto(
                 1L, "Jane", "Smith", "john.doe@example.com", "1234567890",
                 createAddressDto("221B Baker St", "London", "Greater London", "UK", "NW1")
         );
         when(usersRepository.save(any(Users.class))).thenAnswer(
-                invocation -> invocation.getArgument(0,Users.class)
+                invocation -> invocation.getArgument(0, Users.class)
         );
         when(userMapper.toDto(user1)).thenReturn(userDto1);
         when(userMapper.toEntity(userDto1)).thenReturn(user1);
@@ -107,10 +115,11 @@ public class UserServiceImplTest {
 
         verify(userMapper).toDto(user1);
         verify(userMapper).toEntity(userDto1);
-        verifyNoMoreInteractions(usersRepository,userMapper);
+        verifyNoMoreInteractions(usersRepository, userMapper);
     }
 
     @Test
+    @DisplayName("Verify findById returns mapped user DTO")
     void findById_returnsMappedDto() {
         Long id = 1L;
         Users user1 = createUser(
@@ -136,6 +145,7 @@ public class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Verify findById throws exception when user is not found")
     void findById_notFound_throws() {
         Long id = 99L;
         when(usersRepository.findById(id)).thenReturn(Optional.empty());
@@ -150,13 +160,14 @@ public class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Verify updateUser merges fields and saves updated user")
     void updateUser_mergesNames_andSaves() {
         Long id = 1L;
 
         UsersDto patch = createUserDto(
                 id, "NewFirst", "NewLast",
                 "ignored@example.com", "000",
-                createAddressDto("ignored","ignored","ignored","ignored","ignored")
+                createAddressDto("ignored", "ignored", "ignored", "ignored", "ignored")
         );
 
         Users userUpdate = createUser(null, "NewFirst", "NewLast", null, null, null, null);
@@ -165,7 +176,7 @@ public class UserServiceImplTest {
         Users existing = createUser(
                 id, "OldFirst", "OldLast", "jane@example.com", "1234567890",
                 UserRole.CUSTOMER,
-                createAddress(10L,"221B Baker St","London","Greater London","UK","NW1")
+                createAddress(10L, "221B Baker St", "London", "Greater London", "UK", "NW1")
         );
         when(usersRepository.findById(id)).thenReturn(Optional.of(existing));
         when(usersRepository.save(any(Users.class))).thenAnswer(inv -> inv.getArgument(0, Users.class));
@@ -207,13 +218,14 @@ public class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Verify updateUser throws exception when user is not found")
     void updateUser_notFound_throws_andMapperStillCalledForPatch() {
         Long id = 42L;
 
         UsersDto patch = createUserDto(
                 id, "NewFirst", "NewLast",
                 "ignored@example.com", "000",
-                createAddressDto("x","x","x","x","x")
+                createAddressDto("x", "x", "x", "x", "x")
         );
         when(userMapper.toEntity(patch)).thenReturn(createUser(null, "NewFirst", "NewLast", null, null, null, null));
         when(usersRepository.findById(id)).thenReturn(java.util.Optional.empty());
@@ -227,10 +239,8 @@ public class UserServiceImplTest {
         verifyNoMoreInteractions(usersRepository, userMapper);
     }
 
-
-
     private Users createUser(Long id, String firstName, String lastName, String email,
-                             String phone, UserRole role, Address address){
+                             String phone, UserRole role, Address address) {
         Users user = new Users();
         user.setId(id);
         user.setFirstName(firstName);
@@ -242,8 +252,7 @@ public class UserServiceImplTest {
         return user;
     }
 
-    private Address createAddress(Long id, String street, String city, String state, String country, String zipcode){
-
+    private Address createAddress(Long id, String street, String city, String state, String country, String zipcode) {
         Address address = new Address();
         address.setId(id);
         address.setStreet(street);
@@ -252,11 +261,10 @@ public class UserServiceImplTest {
         address.setCountry(country);
         address.setZipcode(zipcode);
         return address;
-
     }
 
     private UsersDto createUserDto(Long id, String firstName, String lastName, String email,
-                                   String phone, AddressDto address){
+                                   String phone, AddressDto address) {
         UsersDto usersDto = new UsersDto();
         usersDto.setId(id);
         usersDto.setFirstName(firstName);
@@ -265,10 +273,9 @@ public class UserServiceImplTest {
         usersDto.setPhone(phone);
         usersDto.setAddress(address);
         return usersDto;
-
     }
-    private AddressDto createAddressDto(String street, String city, String state, String country, String zipcode){
 
+    private AddressDto createAddressDto(String street, String city, String state, String country, String zipcode) {
         AddressDto addressDto = new AddressDto();
         addressDto.setStreet(street);
         addressDto.setCity(city);
@@ -276,6 +283,5 @@ public class UserServiceImplTest {
         addressDto.setCountry(country);
         addressDto.setZipcode(zipcode);
         return addressDto;
-
     }
 }

@@ -1,6 +1,7 @@
 package com.ecom.monolith.repositories;
 
 import com.ecom.monolith.model.*;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -13,6 +14,10 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Unit tests for the CartItemRepository class.
+ * This class verifies the repository methods for CartItem entity.
+ */
 @DataJpaTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -25,6 +30,7 @@ public class CartItemRepositoryTest {
     TestEntityManager entityManager;
 
     @Test
+    @DisplayName("Verify findByUsersAndProduct returns correct CartItem")
     void findByUsersAndProduct_success() {
         Users user1 = createUser(
                 "Jane", "Smith", "john.doe@example.com", "1234567890", UserRole.CUSTOMER,
@@ -55,11 +61,10 @@ public class CartItemRepositoryTest {
         assertThat(returnedCart).allMatch(ci -> ci.getUsers().getId().equals(user1.getId()));
         assertThat(returnedCart).extracting(ci -> ci.getProduct().getName())
                 .containsExactlyInAnyOrder("iphone 15", "iphone 16");
-
-
     }
 
     @Test
+    @DisplayName("Verify findByUsersId returns all CartItems for a user")
     void findByUsersId_success() {
         Users user1 = createUser(
                 "Jane", "Smith", "john.doe@example.com", "1234567890", UserRole.CUSTOMER,
@@ -88,7 +93,6 @@ public class CartItemRepositoryTest {
 
         assertThat(returnedCart).hasSize(2);
         assertThat(returnedCart).allMatch(ci -> ci.getUsers().getId().equals(user1.getId()));
-
     }
 
     private Users createUser(String firstName, String lastName, String email,
@@ -104,7 +108,6 @@ public class CartItemRepositoryTest {
     }
 
     private Address createAddress(String street, String city, String state, String country, String zipcode) {
-
         Address address = new Address();
         address.setStreet(street);
         address.setCity(city);
@@ -112,7 +115,6 @@ public class CartItemRepositoryTest {
         address.setCountry(country);
         address.setZipcode(zipcode);
         return address;
-
     }
 
     private Product product(String name, String description, BigDecimal price, boolean active, Integer stock) {
